@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import House, Room, Tenant, PaymentHistory, TenantDocument
-from .serializers import HouseSerializer, RoomSerializer, TenantSerializer, PaymentHistorySerializer, TenantDocumentSerializer
+from .models import House, Room, Tenant, PaymentHistory, TenantDocument, PaymentReceived
+from .serializers import HouseSerializer, RoomSerializer, TenantSerializer, PaymentHistorySerializer, TenantDocumentSerializer, PaymentReceivedSerializer
 
 class HouseViewSet(viewsets.ModelViewSet):
     queryset = House.objects.all()
@@ -140,3 +140,11 @@ class TenantDocumentViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         super().destroy(request, *args, **kwargs)
         return Response({"message": "File deleted successfully"}, status=200)
+
+class PaymentReceivedViewSet(viewsets.ModelViewSet):
+    queryset = PaymentReceived.objects.all()
+    serializer_class = PaymentReceivedSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(tenant__room__house__owner=self.request.user)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import House, Room, Tenant, PaymentHistory, TenantDocument
+from .models import House, Room, Tenant, PaymentHistory, TenantDocument, PaymentReceived
 
 class HouseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,3 +66,21 @@ class PaymentHistorySerializer(serializers.ModelSerializer):
             'total_paid', 'created_at', 'updated_at',
             'electricity_updated_at', 'water_updated_at', 'rent_updated_at', 'waste_updated_at'
         ]
+        
+class PaymentReceivedSerializer(serializers.ModelSerializer):
+    tenant_id = serializers.IntegerField(source='tenant.id', read_only=True)
+    tenant = serializers.PrimaryKeyRelatedField(queryset=Tenant.objects.all(), write_only=True)
+
+    class Meta:
+        model = PaymentReceived
+        fields = [
+            'id',
+            'tenant_id',
+            'tenant',
+            'amount',
+            'received_date',
+            'remarks',
+            'status',
+            'created_at',
+        ]
+        read_only_fields = ('status', 'created_at')

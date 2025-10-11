@@ -41,37 +41,6 @@ class TenantDocument(models.Model):
     def __str__(self):
         return f"Document for {self.tenant.name}"
 
-# class PaymentHistory(models.Model):
-#     PAYMENT_STATUS_CHOICES = [
-#         ('Paid', 'Paid'),
-#         ('Unpaid', 'Unpaid'),
-#         ('Partially Paid', 'Partially Paid'),
-#     ]
-
-#     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='payment_history')
-#     month = models.CharField(max_length=50,blank=False)
-#     previous_units = models.IntegerField()
-#     current_units = models.IntegerField()
-#     electricity = models.DecimalField(max_digits=10, decimal_places=2)
-#     water = models.DecimalField(max_digits=10, decimal_places=2)
-#     rent = models.DecimalField(max_digits=10, decimal_places=2)
-#     waste = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-#     total = models.DecimalField(max_digits=10, decimal_places=2)
-#     status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
-#     electricity_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
-#     water_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
-#     rent_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
-#     waste_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
-#     created_at = models.DateTimeField(default=timezone.now)
-
-#     def __str__(self):
-#         return f"Payment for {self.room} - {self.month}"
-
-#     def save(self, *args, **kwargs):
-#         if self.previous_units >= self.current_units:
-#             raise ValidationError('Previous unit must be less than current unit.')
-#         super().save(*args, **kwargs)
-
 class PaymentHistory(models.Model):
     PAYMENT_STATUS_CHOICES = [
         ('Paid', 'Paid'),
@@ -156,3 +125,58 @@ class PaymentHistory(models.Model):
         elif paid < amount:
             return 'Partially Paid'
         return 'Paid'
+
+
+class PaymentReceived(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('Paid', 'Paid'),
+        ('Partially Paid', 'Partially Paid'),
+        ('Unpaid', 'Unpaid'),
+    ]
+
+    tenant = models.ForeignKey('Tenant', on_delete=models.CASCADE, related_name='payments')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    received_date = models.DateField(default=timezone.now)
+    remarks = models.TextField(blank=True, null=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default='Unpaid',
+        editable=False
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.tenant.name} ({self.amount}) on {self.received_date} - {self.status}"
+
+    def save(self, *args, **kwargs):
+        """When a payment is saved, update the tenant's overall payment status."""
+        super().save(*args, **kwargs)
+        self.update_payment_status()
+
+    def update_payment_status(self):
+        """Calculate the payment status of this tenant from PaymentHistory totals."""
+        from .models import PaymentHistory  # avoid circular import
+
+        # Total amount due across all histories
+        total_due = PaymentHistory.objects.filter(room__tenant=self.tenant).aggregate(
+            total_due=Sum('total')
+        )['total_due'] or 0
+
+        # Total amount received from this tenant
+        total_received = PaymentReceived.objects.filter(tenant=self.tenant).aggregate(
+            total_received=Sum('amount')
+        )['total_received'] or 0
+
+        # Determine payment status
+        if total_received == 0:
+            status = 'Unpaid'
+        elif total_received < total_due:
+            status = 'Partially Paid'
+        else:
+            status = 'Paid'
+
+        # Update status for all tenant payments (keep them consistent)
+        PaymentReceived.objects.filter(tenant=self.tenant).update(status=status)
