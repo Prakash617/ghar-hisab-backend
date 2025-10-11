@@ -70,6 +70,7 @@ class PaymentHistorySerializer(serializers.ModelSerializer):
 class PaymentReceivedSerializer(serializers.ModelSerializer):
     tenant_id = serializers.IntegerField(source='tenant.id', read_only=True)
     tenant = serializers.PrimaryKeyRelatedField(queryset=Tenant.objects.all(), write_only=True)
+    received_date = serializers.DateField(format="%Y-%m-%d")
     total_amount_due = serializers.SerializerMethodField()
 
     class Meta:
