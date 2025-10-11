@@ -72,6 +72,7 @@ class PaymentReceivedSerializer(serializers.ModelSerializer):
     tenant = serializers.PrimaryKeyRelatedField(queryset=Tenant.objects.all(), write_only=True)
     received_date = serializers.DateField(format="%Y-%m-%d")
     total_amount_due = serializers.SerializerMethodField()
+    remaining_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentReceived
@@ -85,8 +86,9 @@ class PaymentReceivedSerializer(serializers.ModelSerializer):
             'status',
             'created_at',
             'total_amount_due',
+            'remaining_amount',
         ]
-        read_only_fields = ('status', 'created_at', 'total_amount_due')
+        read_only_fields = ('status', 'created_at', 'total_amount_due', 'remaining_amount')
 
     def get_total_amount_due(self, obj):
         from django.db.models import Sum
@@ -94,3 +96,11 @@ class PaymentReceivedSerializer(serializers.ModelSerializer):
             total_due=Sum('total')
         )['total_due'] or 0
         return total_due
+
+    def get_remaining_amount(self, obj):
+        from django.db.models import Sum
+        total_due = self.get_total_amount_due(obj)
+        total_received = PaymentReceived.objects.filter(tenant=obj.tenant).aggregate(
+            total_received=Sum('amount')
+        )['total_received'] or 0
+        return total_due - total_received
