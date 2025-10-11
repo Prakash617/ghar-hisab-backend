@@ -26,11 +26,51 @@ class Tenant(models.Model):
     name = models.CharField(max_length=100)
     contact = models.CharField(max_length=15)
     move_in_date = models.DateField()
-    document = models.FileField(upload_to='tenant_documents/', blank=True, null=True)
     electricity_price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=15.00)
+    water_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    rent_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    waste_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return self.name
+
+class TenantDocument(models.Model):
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name='documents')
+    document = models.FileField(upload_to='tenant_documents/')
+
+    def __str__(self):
+        return f"Document for {self.tenant.name}"
+
+# class PaymentHistory(models.Model):
+#     PAYMENT_STATUS_CHOICES = [
+#         ('Paid', 'Paid'),
+#         ('Unpaid', 'Unpaid'),
+#         ('Partially Paid', 'Partially Paid'),
+#     ]
+
+#     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='payment_history')
+#     month = models.CharField(max_length=50,blank=False)
+#     previous_units = models.IntegerField()
+#     current_units = models.IntegerField()
+#     electricity = models.DecimalField(max_digits=10, decimal_places=2)
+#     water = models.DecimalField(max_digits=10, decimal_places=2)
+#     rent = models.DecimalField(max_digits=10, decimal_places=2)
+#     waste = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+#     total = models.DecimalField(max_digits=10, decimal_places=2)
+#     status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+#     electricity_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+#     water_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+#     rent_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+#     waste_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+#     created_at = models.DateTimeField(default=timezone.now)
+
+#     def __str__(self):
+#         return f"Payment for {self.room} - {self.month}"
+
+#     def save(self, *args, **kwargs):
+#         if self.previous_units >= self.current_units:
+#             raise ValidationError('Previous unit must be less than current unit.')
+#         super().save(*args, **kwargs)
 
 class PaymentHistory(models.Model):
     PAYMENT_STATUS_CHOICES = [
@@ -40,23 +80,79 @@ class PaymentHistory(models.Model):
     ]
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='payment_history')
-    month = models.CharField(max_length=50,blank=False)
+    billing_month = models.DateField(default=timezone.now)  # better than CharField for consistency
+    
     previous_units = models.IntegerField()
     current_units = models.IntegerField()
+    
     electricity = models.DecimalField(max_digits=10, decimal_places=2)
-    water = models.DecimalField(max_digits=10, decimal_places=2)
-    rent = models.DecimalField(max_digits=10, decimal_places=2)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+    electricity_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     electricity_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+    electricity_updated_at = models.DateTimeField(null=True, blank=True)
+    
+    water = models.DecimalField(max_digits=10, decimal_places=2)
+    water_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     water_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+    water_updated_at = models.DateTimeField(null=True, blank=True)
+    
+    rent = models.DecimalField(max_digits=10, decimal_places=2)
+    rent_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     rent_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
-    created_at = models.DateTimeField(default=timezone.now)
+    rent_updated_at = models.DateTimeField(null=True, blank=True)
+    
+    waste = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    waste_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    waste_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+    waste_updated_at = models.DateTimeField(null=True, blank=True)
+
+    total = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    total_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Unpaid')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  # updates automatically
 
     def __str__(self):
-        return f"Payment for {self.room} - {self.month}"
+        return f"Payment for {self.room} - {self.billing_month.strftime('%B %Y')}"
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         if self.previous_units >= self.current_units:
             raise ValidationError('Previous unit must be less than current unit.')
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # if the instance is new
+            tenant = self.room.tenant
+            self.electricity = (self.current_units - self.previous_units) * tenant.electricity_price_per_unit
+            self.water = tenant.water_price
+            self.rent = tenant.rent_price
+            self.waste = tenant.waste_price
+        else:
+            original = PaymentHistory.objects.get(pk=self.pk)
+            if self.electricity_paid != original.electricity_paid:
+                self.electricity_updated_at = timezone.now()
+            if self.water_paid != original.water_paid:
+                self.water_updated_at = timezone.now()
+            if self.rent_paid != original.rent_paid:
+                self.rent_updated_at = timezone.now()
+            if self.waste_paid != original.waste_paid:
+                self.waste_updated_at = timezone.now()
+
+        # Auto calculate total
+        self.total = self.electricity + self.water + self.rent + self.waste
+        self.total_paid = self.electricity_paid + self.water_paid + self.rent_paid + self.waste_paid
+
+        # Update statuses
+        self.electricity_status = self._get_status(self.electricity, self.electricity_paid)
+        self.water_status = self._get_status(self.water, self.water_paid)
+        self.rent_status = self._get_status(self.rent, self.rent_paid)
+        self.waste_status = self._get_status(self.waste, self.waste_paid)
+        self.status = self._get_status(self.total, self.total_paid)
+
         super().save(*args, **kwargs)
+
+    def _get_status(self, amount, paid):
+        if paid == 0:
+            return 'Unpaid'
+        elif paid < amount:
+            return 'Partially Paid'
+        return 'Paid'
