@@ -141,3 +141,14 @@ class TenantDocumentViewSet(viewsets.ModelViewSet):
         super().destroy(request, *args, **kwargs)
         return Response({"message": "File deleted successfully"}, status=200)
 
+class PaymentReceivedViewSet(viewsets.ModelViewSet):
+    queryset = PaymentReceived.objects.all()
+    serializer_class = PaymentReceivedSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(tenant__room__house__owner=self.request.user)
+        tenant_id = self.request.query_params.get('tenant_id')
+        if tenant_id:
+            queryset = queryset.filter(tenant__id=tenant_id)
+        return queryset
