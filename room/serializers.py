@@ -70,6 +70,7 @@ class PaymentHistorySerializer(serializers.ModelSerializer):
 class PaymentReceivedSerializer(serializers.ModelSerializer):
     tenant_id = serializers.IntegerField(source='tenant.id', read_only=True)
     tenant = serializers.PrimaryKeyRelatedField(queryset=Tenant.objects.all(), write_only=True)
+    total_amount_due = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentReceived
@@ -82,5 +83,13 @@ class PaymentReceivedSerializer(serializers.ModelSerializer):
             'remarks',
             'status',
             'created_at',
+            'total_amount_due',
         ]
-        read_only_fields = ('status', 'created_at')
+        read_only_fields = ('status', 'created_at', 'total_amount_due')
+
+    def get_total_amount_due(self, obj):
+        from django.db.models import Sum
+        total_due = PaymentHistory.objects.filter(room__tenant=obj.tenant).aggregate(
+            total_due=Sum('total')
+        )['total_due'] or 0
+        return total_due
