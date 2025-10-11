@@ -152,3 +152,8 @@ class PaymentReceivedViewSet(viewsets.ModelViewSet):
         if tenant_id:
             queryset = queryset.filter(tenant__id=tenant_id)
         return queryset
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"message": "Payment record deleted successfully."}, status=status.HTTP_200_OK)
