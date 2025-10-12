@@ -157,8 +157,11 @@ SIMPLE_JWT = {
 
 STATIC_URL = 'static/'
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = []
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
+# STATICFILES_DIRS = []
+
+STATICFILES_DIRS = [BASE_DIR / 'static'] if DEBUG else []
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Optional: define a static root for production
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
