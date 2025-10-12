@@ -133,6 +133,7 @@ class PaymentReceived(models.Model):
         ('Paid', 'Paid'),
         ('Partially Paid', 'Partially Paid'),
         ('Unpaid', 'Unpaid'),
+        ('Overpaid', 'Overpaid'),
     ]
 
     tenant = models.ForeignKey('Tenant', on_delete=models.CASCADE, related_name='payments')
@@ -176,6 +177,8 @@ class PaymentReceived(models.Model):
             status = 'Unpaid'
         elif total_received < total_due:
             status = 'Partially Paid'
+        elif total_received > total_due:
+            status = 'Overpaid'
         else:
             status = 'Paid'
 
