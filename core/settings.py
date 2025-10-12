@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-8(nvs5byu)lclr%9p4pe7kl1^&-_w^@gh7a97bu#lz4i!d=nu#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['nurseicon.com.np', 'localhost', '127.0.0.1']
 
 
 # Application definition
