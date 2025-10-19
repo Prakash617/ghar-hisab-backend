@@ -6,18 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('room', '0011_tenant_rent_price_tenant_waste_price_and_more'),
+        ("room", "0011_tenant_rent_price_tenant_waste_price_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='paymenthistory',
-            name='waste',
+            model_name="paymenthistory",
+            name="waste",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='waste_status',
-            field=models.CharField(choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid'), ('Partially Paid', 'Partially Paid')], default='Unpaid', max_length=20),
+            model_name="paymenthistory",
+            name="waste_status",
+            field=models.CharField(
+                choices=[
+                    ("Paid", "Paid"),
+                    ("Unpaid", "Unpaid"),
+                    ("Partially Paid", "Partially Paid"),
+                ],
+                default="Unpaid",
+                max_length=20,
+            ),
         ),
     ]

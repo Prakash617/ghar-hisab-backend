@@ -62,3 +62,5 @@ coverage.xml
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+deploy.sh

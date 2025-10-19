@@ -7,13 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('room', '0008_alter_tenant_electricity_price_per_unit'),
+        ("room", "0008_alter_tenant_electricity_price_per_unit"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='paymenthistory',
-            name='created_at',
+            model_name="paymenthistory",
+            name="created_at",
             field=models.DateTimeField(default=django.utils.timezone.now),
         ),
     ]

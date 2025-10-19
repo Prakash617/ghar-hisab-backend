@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import EmailSettings
 
-# Register your models here.
+
+@admin.register(EmailSettings)
+class EmailSettingsAdmin(admin.ModelAdmin):
+    list_display = ("EMAIL_HOST_USER", "EMAIL_HOST", "EMAIL_PORT")

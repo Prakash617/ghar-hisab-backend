@@ -8,20 +8,47 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('room', '0014_paymenthistory_electricity_updated_at_and_more'),
+        ("room", "0014_paymenthistory_electricity_updated_at_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PaymentReceived',
+            name="PaymentReceived",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('received_date', models.DateField(default=django.utils.timezone.now)),
-                ('remarks', models.TextField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('Paid', 'Paid'), ('Partially Paid', 'Partially Paid'), ('Unpaid', 'Unpaid')], default='Unpaid', editable=False, max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('tenant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payments', to='room.tenant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("received_date", models.DateField(default=django.utils.timezone.now)),
+                ("remarks", models.TextField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Paid", "Paid"),
+                            ("Partially Paid", "Partially Paid"),
+                            ("Unpaid", "Unpaid"),
+                        ],
+                        default="Unpaid",
+                        editable=False,
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "tenant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payments",
+                        to="room.tenant",
+                    ),
+                ),
             ],
         ),
     ]

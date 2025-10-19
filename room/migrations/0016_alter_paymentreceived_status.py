@@ -6,13 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('room', '0015_paymentreceived'),
+        ("room", "0015_paymentreceived"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='paymentreceived',
-            name='status',
-            field=models.CharField(choices=[('Paid', 'Paid'), ('Partially Paid', 'Partially Paid'), ('Unpaid', 'Unpaid'), ('Overpaid', 'Overpaid')], default='Unpaid', editable=False, max_length=20),
+            model_name="paymentreceived",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("Paid", "Paid"),
+                    ("Partially Paid", "Partially Paid"),
+                    ("Unpaid", "Unpaid"),
+                    ("Overpaid", "Overpaid"),
+                ],
+                default="Unpaid",
+                editable=False,
+                max_length=20,
+            ),
         ),
     ]

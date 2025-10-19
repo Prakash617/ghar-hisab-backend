@@ -7,57 +7,57 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('room', '0012_paymenthistory_waste_paymenthistory_waste_status'),
+        ("room", "0012_paymenthistory_waste_paymenthistory_waste_status"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='paymenthistory',
-            name='month',
+            model_name="paymenthistory",
+            name="month",
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='billing_month',
+            model_name="paymenthistory",
+            name="billing_month",
             field=models.DateField(default=django.utils.timezone.now),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='electricity_paid',
+            model_name="paymenthistory",
+            name="electricity_paid",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='rent_paid',
+            model_name="paymenthistory",
+            name="rent_paid",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='total_paid',
+            model_name="paymenthistory",
+            name="total_paid",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='updated_at',
+            model_name="paymenthistory",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='waste_paid',
+            model_name="paymenthistory",
+            name="waste_paid",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='water_paid',
+            model_name="paymenthistory",
+            name="water_paid",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AlterField(
-            model_name='paymenthistory',
-            name='created_at',
+            model_name="paymenthistory",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True),
         ),
         migrations.AlterField(
-            model_name='paymenthistory',
-            name='total',
+            model_name="paymenthistory",
+            name="total",
             field=models.DecimalField(decimal_places=2, editable=False, max_digits=10),
         ),
     ]

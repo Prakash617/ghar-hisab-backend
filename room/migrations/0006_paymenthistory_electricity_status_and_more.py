@@ -6,23 +6,47 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('room', '0005_remove_room_owner_house_room_house'),
+        ("room", "0005_remove_room_owner_house_room_house"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='paymenthistory',
-            name='electricity_status',
-            field=models.CharField(choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid'), ('Partially Paid', 'Partially Paid')], default='Unpaid', max_length=20),
+            model_name="paymenthistory",
+            name="electricity_status",
+            field=models.CharField(
+                choices=[
+                    ("Paid", "Paid"),
+                    ("Unpaid", "Unpaid"),
+                    ("Partially Paid", "Partially Paid"),
+                ],
+                default="Unpaid",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='rent_status',
-            field=models.CharField(choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid'), ('Partially Paid', 'Partially Paid')], default='Unpaid', max_length=20),
+            model_name="paymenthistory",
+            name="rent_status",
+            field=models.CharField(
+                choices=[
+                    ("Paid", "Paid"),
+                    ("Unpaid", "Unpaid"),
+                    ("Partially Paid", "Partially Paid"),
+                ],
+                default="Unpaid",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='paymenthistory',
-            name='water_status',
-            field=models.CharField(choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid'), ('Partially Paid', 'Partially Paid')], default='Unpaid', max_length=20),
+            model_name="paymenthistory",
+            name="water_status",
+            field=models.CharField(
+                choices=[
+                    ("Paid", "Paid"),
+                    ("Unpaid", "Unpaid"),
+                    ("Partially Paid", "Partially Paid"),
+                ],
+                default="Unpaid",
+                max_length=20,
+            ),
         ),
     ]

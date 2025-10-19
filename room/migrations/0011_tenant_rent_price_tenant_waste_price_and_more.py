@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('room', '0010_remove_tenant_document_tenantdocument'),
+        ("room", "0010_remove_tenant_document_tenantdocument"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tenant',
-            name='rent_price',
+            model_name="tenant",
+            name="rent_price",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='tenant',
-            name='waste_price',
+            model_name="tenant",
+            name="waste_price",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
         migrations.AddField(
-            model_name='tenant',
-            name='water_price',
+            model_name="tenant",
+            name="water_price",
             field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
         ),
     ]
