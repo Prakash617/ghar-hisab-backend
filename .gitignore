@@ -29,6 +29,7 @@ env/
 # Django-specific
 *.log
 *.pot
+
 db.sqlite3
 media/
 static_cdn/
