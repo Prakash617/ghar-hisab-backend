@@ -172,6 +172,40 @@ class TenantDocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return self.queryset.filter(tenant__room__house__owner=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        tenant_id = request.data.get("tenant")
+        initial_unit = request.data.get("initial_unit")
+
+        if not tenant_id:
+            return Response(
+                {"error": "Tenant is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            tenant = Tenant.objects.get(pk=tenant_id)
+            if tenant.room.house.owner != request.user:
+                return Response(
+                    {"error": "You do not have permission for this tenant."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        except Tenant.DoesNotExist:
+            return Response(
+                {"error": "Tenant not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        if initial_unit is not None:
+            tenant.initial_unit = initial_unit
+            tenant.save()
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
     def destroy(self, request, *args, **kwargs):
         super().destroy(request, *args, **kwargs)
         return Response({"message": "File deleted successfully"}, status=200)

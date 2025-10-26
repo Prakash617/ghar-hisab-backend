@@ -16,11 +16,11 @@ class RoomSerializer(serializers.ModelSerializer):
 
 class TenantDocumentSerializer(serializers.ModelSerializer):
     tenant = serializers.PrimaryKeyRelatedField(queryset=Tenant.objects.all())
+    initial_unit = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = TenantDocument
-        fields = ["id", "tenant", "document"]
-
+        fields = ["id", "tenant", "document", "initial_unit"]
     def validate_tenant(self, value):
         request = self.context.get("request")
         if not request or not hasattr(request, "user"):
@@ -70,6 +70,7 @@ class TenantSerializer(serializers.ModelSerializer):
             "water_price",
             "rent_price",
             "waste_price",
+            "initial_unit",
             "documents",
         ]
 

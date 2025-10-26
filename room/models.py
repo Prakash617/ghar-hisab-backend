@@ -35,6 +35,7 @@ class Tenant(models.Model):
     water_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     rent_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     waste_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    initial_unit = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
