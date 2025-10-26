@@ -117,6 +117,14 @@ class PaymentHistory(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:  # if the instance is new
             tenant = self.room.tenant
+            last_payment = (
+                PaymentHistory.objects.filter(room=self.room).order_by("-billing_month").first()
+            )
+            if last_payment:
+                self.previous_units = last_payment.current_units
+            else:
+                self.previous_units = tenant.initial_unit
+
             self.electricity = (
                 self.current_units - self.previous_units
             ) * tenant.electricity_price_per_unit
