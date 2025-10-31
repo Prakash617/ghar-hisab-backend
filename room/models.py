@@ -61,9 +61,9 @@ class PaymentHistory(models.Model):
     room = models.ForeignKey(
         Room, on_delete=models.CASCADE, related_name="payment_history"
     )
-    billing_month = models.DateField(
-        default=timezone.now
-    )  # better than CharField for consistency
+    billing_month = models.CharField(
+        max_length=7, default=lambda: timezone.now().strftime("%Y-%m")
+    )  # better than DateField for consistency
 
     previous_units = models.IntegerField()
     current_units = models.IntegerField()
@@ -124,7 +124,6 @@ class PaymentHistory(models.Model):
                 self.previous_units = last_payment.current_units
             else:
                 self.previous_units = tenant.initial_unit
-
             self.electricity = (
                 self.current_units - self.previous_units
             ) * tenant.electricity_price_per_unit
