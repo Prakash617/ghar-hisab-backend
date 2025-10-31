@@ -50,6 +50,10 @@ class TenantDocument(models.Model):
     def __str__(self):
         return f"Document for {self.tenant.name}"
 
+from django.utils import timezone
+
+def current_billing_month():
+    return timezone.now().strftime("%Y-%m")
 
 class PaymentHistory(models.Model):
     PAYMENT_STATUS_CHOICES = [
@@ -62,7 +66,7 @@ class PaymentHistory(models.Model):
         Room, on_delete=models.CASCADE, related_name="payment_history"
     )
     billing_month = models.CharField(
-        max_length=7, default=lambda: timezone.now().strftime("%Y-%m")
+        max_length=7, default=current_billing_month
     )  # better than DateField for consistency
 
     previous_units = models.IntegerField()
