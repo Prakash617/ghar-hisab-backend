@@ -75,6 +75,10 @@ pnpm-lock.yaml
 tailwind/
 theme/static_src/
 
+# Protect SQLite from accidental deletion
+!db.sqlite3
+
+
 # =====================================
 # IDE and Editors
 # =====================================
