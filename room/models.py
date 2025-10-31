@@ -112,7 +112,7 @@ class PaymentHistory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)  # updates automatically
 
     def __str__(self):
-        return f"Payment for {self.room} - {self.billing_month.strftime('%B %Y')}"
+        return f"Payment for {self.room} - {self.billing_month}"
 
     def clean(self):
         if self.previous_units >= self.current_units:
