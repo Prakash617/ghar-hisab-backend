@@ -11,20 +11,40 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+
 from pathlib import Path
 
+from decouple import config
+
+
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+
+
+
 # Quick-start development settings - unsuitable for production
+
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-8(nvs5byu)lclr%9p4pe7kl1^&-_w^@gh7a97bu#lz4i!d=nu#"
+
+SECRET_KEY = config('SECRET_KEY')
+
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+
 
 ALLOWED_HOSTS = ["nurseicon.com.np", "localhost", "127.0.0.1"]
 
@@ -79,35 +99,30 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'gharhisab',
-#         'USER': 'gharhisab_user',
-#         'PASSWORD': 'admin',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'prakash2_gharhisab',
-        'USER': 'prakash2_gharhisab_user',
-        'PASSWORD': 'prakash2_gharhisab_user',
-        'HOST': '65.21.228.101',
-        'HOST': 'localhost',
-        'PORT': '5432',
+if DEBUG:
+    # Local development database
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'gharhisab',
+            'USER': 'gharhisab_user',
+            'PASSWORD': 'admin',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
     }
-}
+else:
+    # Production database (from .env)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': config('DB_PORT'),
+        }
+    }
 
 
 
@@ -224,5 +239,5 @@ except (AppRegistryNotReady, Exception):
     EMAIL_HOST = "smtp.gmail.com"
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = "prakashthapa617@gmail.com"  # Your email
-    EMAIL_HOST_PASSWORD = "sntnyasfqvelzzjl"  # Your email password
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='your_email@example.com')  # Your email
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='your_email_password')  # Your email password
