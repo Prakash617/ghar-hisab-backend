@@ -182,7 +182,7 @@ class PaymentReceived(models.Model):
         "Tenant", on_delete=models.CASCADE, related_name="payments"
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    received_date = models.DateField(default=timezone.now)
+    received_date = models.TextField(default=timezone.now().strftime("%Y-%m-%d"))
     remarks = models.TextField(blank=True, null=True)
 
     status = models.CharField(
