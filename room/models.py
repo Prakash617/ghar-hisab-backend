@@ -66,7 +66,7 @@ class PaymentHistory(models.Model):
         Room, on_delete=models.CASCADE, related_name="payment_history"
     )
     billing_month = models.CharField(
-        max_length=7, default=current_billing_month
+        max_length=50, default=current_billing_month
     )  # better than DateField for consistency
 
     previous_units = models.IntegerField()
