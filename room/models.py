@@ -191,7 +191,7 @@ class PaymentReceived(models.Model):
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     received_date = models.CharField(
-        max_length=10,
+        max_length=50,
         default=current_date_str,
     )    
     remarks = models.TextField(blank=True, null=True)
