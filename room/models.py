@@ -170,6 +170,14 @@ class PaymentHistory(models.Model):
         return "Paid"
 
 
+from django.utils import timezone
+from django.db import models
+
+def current_date_str():
+    """Return current date as YYYY-MM-DD string"""
+    return timezone.now().strftime("%Y-%m-%d")
+
+
 class PaymentReceived(models.Model):
     PAYMENT_STATUS_CHOICES = [
         ("Paid", "Paid"),
@@ -182,7 +190,10 @@ class PaymentReceived(models.Model):
         "Tenant", on_delete=models.CASCADE, related_name="payments"
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    received_date = models.TextField(default=timezone.now().strftime("%Y-%m-%d"))
+    received_date = models.CharField(
+        max_length=10,
+        default=current_date_str,
+    )    
     remarks = models.TextField(blank=True, null=True)
 
     status = models.CharField(
