@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import House, Room, Tenant, PaymentHistory, TenantDocument
+from .models import House, Room, Tenant, PaymentHistory, TenantDocument,PaymentReceived
 
 
 class TenantDocumentInline(admin.TabularInline):
@@ -16,3 +16,4 @@ admin.site.register(Room)
 admin.site.register(Tenant, TenantAdmin)
 admin.site.register(PaymentHistory)
 admin.site.register(TenantDocument)
+admin.site.register(PaymentReceived)

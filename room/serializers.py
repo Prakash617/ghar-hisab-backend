@@ -138,7 +138,7 @@ class PaymentReceivedSerializer(serializers.ModelSerializer):
     tenant = serializers.PrimaryKeyRelatedField(
         queryset=Tenant.objects.all(), write_only=True
     )
-    received_date = serializers.DateField(format="%Y-%m-%d")
+    received_date = serializers.CharField(max_length=50)
     total_amount_due = serializers.SerializerMethodField()
     remaining_amount = serializers.SerializerMethodField()
 
