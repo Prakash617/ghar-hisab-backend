@@ -17,3 +17,4 @@ admin.site.register(Tenant, TenantAdmin)
 admin.site.register(PaymentHistory)
 admin.site.register(TenantDocument)
 admin.site.register(PaymentReceived)
+

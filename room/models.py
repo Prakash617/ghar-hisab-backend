@@ -15,7 +15,7 @@ class House(models.Model):
 
 class Room(models.Model):
     house = models.ForeignKey(House, on_delete=models.CASCADE, null=True)
-    room_number = models.CharField(max_length=10)
+    room_number = models.CharField(max_length=50)
     is_occupied = models.BooleanField(default=False)
 
     def __str__(self):
