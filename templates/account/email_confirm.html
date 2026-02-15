@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Verify Email Address" %}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-12">
+    <div class="flex justify-center">
+        <div class="w-full md:w-1/2">
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="p-8 md:p-12">
+                    <h2 class="mb-4 text-2xl font-bold text-center">{% trans "Verify Email Address" %}</h2>
+                    
+                    {% if confirmation %}
+                        <div class="p-4 mb-4 text-blue-700 bg-blue-100 rounded-md">
+                            {% blocktrans with email=confirmation.email_address.email %}
+                                Please confirm that <strong class="font-bold">{{ email }}</strong> is an e-mail address for user {{ user_display }}.
+                            {% endblocktrans %}
+                        </div>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700">
+                                {% trans "Confirm Email Address" %}
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="p-4 mb-4 text-yellow-700 bg-yellow-100 rounded-md">
+                            {% trans "This email confirmation link has expired or is invalid." %}
+                        </div>
+                        <p class="text-center">
+                            <a href="{% url 'account_email' %}" class="inline-block px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700">
+                                {% trans "Request a new email confirmation" %}
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    <hr class="my-8">
+
+                    <div class="text-center">
+                        <p class="mb-0">
+                            <a href="{% url 'account_login' %}" class="text-blue-500 no-underline hover:text-blue-700">
+                                {% trans "Back to Sign In" %}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

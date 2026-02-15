@@ -1,0 +1,170 @@
+{% extends "room/base.html" %}
+
+{% block content %}
+<section class="space-y-6">
+	<!-- Success/Error Messages -->
+	{% if messages %}
+		<div class="space-y-2">
+			{% for message in messages %}
+				<div class="rounded-lg {% if message.tags == 'success' %}bg-emerald-50 text-emerald-700 border border-emerald-200{% else %}bg-rose-50 text-rose-700 border border-rose-200{% endif %} p-4 text-sm flex items-start justify-between">
+					<span>{{ message }}</span>
+					<button onclick="this.parentElement.remove()" class="text-current hover:opacity-75">
+						<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+						</svg>
+					</button>
+				</div>
+			{% endfor %}
+		</div>
+	{% endif %}
+
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div>
+			<h1 class="text-2xl font-semibold text-slate-900">My Houses</h1>
+			<p class="text-sm text-slate-500">List of houses for the logged-in owner.</p>
+		</div>
+		<button id="addHouseBtn" class="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-sky-200 hover:bg-sky-600">Add house</button>
+	</div>
+
+	<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+		{% for house in houses %}
+			<a href="{% url 'room:house_rooms' house.id %}" class="group rounded-xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+				<div class="flex items-start justify-between">
+					<div>
+						<h2 class="text-lg font-semibold text-slate-900 group-hover:text-sky-600">{{ house.name }}</h2>
+						<p class="text-sm text-slate-500">Owner: {{ house.owner.username }}</p>
+					</div>
+					<div class="text-right">
+						<p class="text-xs font-semibold text-slate-500 status-text-{{ house.id }}">
+							{% if house.is_active %}Active{% else %}Inactive{% endif %}
+						</p>
+						<label onclick="event.preventDefault(); event.stopPropagation();" class="mt-1 inline-flex cursor-pointer items-center">
+							<input type="checkbox" class="peer sr-only toggle-house" data-house-id="{{ house.id }}" {% if house.is_active %}checked{% endif %} />
+							<span class="h-5 w-9 rounded-full bg-slate-200 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition peer-checked:bg-emerald-500 peer-checked:after:translate-x-4 relative"></span>
+						</label>
+					</div>
+				</div>
+				<div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+					<div>
+						<p class="text-xs text-slate-400">Rooms</p>
+						<p class="font-semibold text-slate-900">{{ house.rooms_count }}</p>
+					</div>
+					<div>
+						<p class="text-xs text-slate-400">Occupied</p>
+						<p class="font-semibold text-slate-900">{{ house.occupied_count }}</p>
+					</div>
+					<div>
+						<p class="text-xs text-slate-400">Vacant</p>
+						<p class="font-semibold text-slate-900">{{ house.vacant_count }}</p>
+					</div>
+				</div>
+			</a>
+		{% empty %}
+			<div class="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+				No houses found for this account.
+			</div>
+		{% endfor %}
+	</div>
+
+	<!-- Add House Modal -->
+	<div id="addHouseModal" tabindex="-1" class="fixed left-0 right-0 top-0 z-50 hidden h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden bg-slate-900/40">
+		<div class="relative w-full max-w-md p-4">
+			<div class="relative rounded-xl bg-white shadow-xl">
+				<!-- Modal header -->
+				<div class="flex items-center justify-between rounded-t border-b border-slate-200 p-4">
+					<h3 class="text-xl font-semibold text-slate-900">Add New House</h3>
+					<button type="button" id="closeModalBtn" class="ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-slate-400 hover:bg-slate-100 hover:text-slate-900">
+						<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+						</svg>
+					</button>
+				</div>
+				<!-- Modal body -->
+				<form method="POST" action="{% url 'room:add_house' %}" class="p-4">
+					{% csrf_token %}
+					<div class="space-y-4">
+						<div>
+							<label for="house_name" class="mb-2 block text-sm font-medium text-slate-900">House Name</label>
+							<input type="text" name="name" id="house_name" class="block w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm text-slate-900 focus:border-sky-400 focus:ring-sky-200" placeholder="e.g., Maple Residency" required>
+						</div>
+					</div>
+					<!-- Modal footer -->
+					<div class="mt-6 flex items-center gap-3">
+						<button type="submit" class="w-full rounded-lg bg-sky-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-sky-600 focus:outline-none focus:ring-4 focus:ring-sky-200">Add House</button>
+						<button type="button" id="cancelBtn" class="w-full rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:z-10 focus:outline-none focus:ring-4 focus:ring-slate-200">Cancel</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	const modal = document.getElementById('addHouseModal');
+	const addBtn = document.getElementById('addHouseBtn');
+	const closeBtn = document.getElementById('closeModalBtn');
+	const cancelBtn = document.getElementById('cancelBtn');
+
+	// Open modal
+	addBtn.addEventListener('click', () => {
+		modal.classList.remove('hidden');
+		modal.classList.add('flex');
+	});
+
+	// Close modal
+	const closeModal = () => {
+		modal.classList.add('hidden');
+		modal.classList.remove('flex');
+	};
+
+	closeBtn.addEventListener('click', closeModal);
+	cancelBtn.addEventListener('click', closeModal);
+
+	// Close modal when clicking outside
+	modal.addEventListener('click', (e) => {
+		if (e.target === modal) {
+			closeModal();
+		}
+	});
+
+	// Handle toggle switches
+	document.addEventListener('click', (e) => {
+		if (e.target.classList.contains('toggle-house')) {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			const checkbox = e.target;
+			const houseId = checkbox.dataset.houseId;
+			const statusText = document.querySelector(`.status-text-${houseId}`);
+			
+			// Send AJAX request
+			fetch(`/room/houses/${houseId}/toggle/`, {
+				method: 'POST',
+				headers: {
+					'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+					'Content-Type': 'application/json',
+				},
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					// Update status text
+					if (statusText) {
+						statusText.textContent = data.is_active ? 'Active' : 'Inactive';
+					}
+				} else {
+					// Revert checkbox state if failed
+					checkbox.checked = !checkbox.checked;
+					alert('Failed to update status');
+				}
+			})
+			.catch(error => {
+				// Revert checkbox state on error
+				checkbox.checked = !checkbox.checked;
+				console.error('Error:', error);
+			});
+		}
+	});
+</script>
+
+{% endblock content %}

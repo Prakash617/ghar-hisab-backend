@@ -1,0 +1,215 @@
+{% extends "room/base.html" %}
+
+{% block content %}
+<section class="space-y-6">
+	<!-- Page Header -->
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div>
+			<h1 class="text-2xl font-semibold text-slate-900">Dashboard</h1>
+			<p class="text-sm text-slate-500">Overview of your properties and billing</p>
+		</div>
+		<a href="{% url 'room:houses' %}" class="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-sky-200 hover:bg-sky-600">Manage properties</a>
+	</div>
+
+	<!-- Summary Stats -->
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+		<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-wide text-slate-500">Total houses</p>
+					<p class="mt-2 text-3xl font-semibold text-slate-900">{{ houses|length }}</p>
+				</div>
+				<div class="rounded-full bg-sky-50 p-3 text-sky-600">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v7a1 1 0 001 1h2m14-8v7a1 1 0 01-1 1h-2m0-7V9m0 7h4"/>
+					</svg>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-wide text-slate-500">Total rooms</p>
+					<p class="mt-2 text-3xl font-semibold text-slate-900">{{ total_rooms }}</p>
+				</div>
+				<div class="rounded-full bg-blue-50 p-3 text-blue-600">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5.581m0 0H9m0 0h5.581M9 3h6m0 0V1m0 2v-1"/>
+					</svg>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-wide text-slate-500">Occupied</p>
+					<p class="mt-2 text-3xl font-semibold text-emerald-600">{{ occupied_rooms }}</p>
+					<p class="mt-1 text-xs text-slate-500">{% if total_rooms > 0 %}{{ occupied_rooms|add:0|floatformat:0 }}% occupied{% else %}-{% endif %}</p>
+				</div>
+				<div class="rounded-full bg-emerald-50 p-3 text-emerald-600">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+					</svg>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-wide text-slate-500">Vacant</p>
+					<p class="mt-2 text-3xl font-semibold text-amber-600">{{ vacant_rooms }}</p>
+					<p class="mt-1 text-xs text-slate-500">{% if total_rooms > 0 %}{{ vacant_rooms|add:0|floatformat:0 }}% vacant{% else %}-{% endif %}</p>
+				</div>
+				<div class="rounded-full bg-amber-50 p-3 text-amber-600">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+					</svg>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-wide text-slate-500">Monthly income</p>
+					<p class="mt-2 text-3xl font-semibold text-green-600">Rs. {{ monthly_income|floatformat:0 }}</p>
+					<p class="mt-1 text-xs text-slate-500">From {{ occupied_rooms }} occupied room{{ occupied_rooms|pluralize }}</p>
+				</div>
+				<div class="rounded-full bg-green-50 p-3 text-green-600">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+					</svg>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-wide text-slate-500">Annual income</p>
+					<p class="mt-2 text-3xl font-semibold text-cyan-600">Rs. {{ annual_income|floatformat:0 }}</p>
+					<p class="mt-1 text-xs text-slate-500">{{ monthly_income|floatformat:0 }} × 12 months</p>
+				</div>
+				<div class="rounded-full bg-cyan-50 p-3 text-cyan-600">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+					</svg>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-wide text-slate-500">Remaining amount</p>
+					<p class="mt-2 text-3xl font-semibold text-orange-600">Rs. {{ remaining_amount|floatformat:0 }}</p>
+					<p class="mt-1 text-xs text-slate-500">Pending payments</p>
+				</div>
+				<div class="rounded-full bg-orange-50 p-3 text-orange-600">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+					</svg>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Houses Section -->
+	<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+		<div class="mb-4 flex items-center justify-between">
+			<h2 class="text-lg font-semibold text-slate-900">Your properties</h2>
+		</div>
+		{% if houses %}
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{% for house in houses %}
+			<a href="{% url 'room:house_rooms' house.id %}" class="group rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-md">
+				<div class="flex items-start justify-between">
+					<div class="flex-1">
+						<h3 class="font-semibold text-slate-900 group-hover:text-sky-600">{{ house.name }}</h3>
+						<p class="mt-1 text-sm text-slate-500">{{ house.address|truncatewords:5 }}</p>
+					</div>
+					<div class="rounded-full bg-sky-50 px-2 py-1 text-xs font-semibold text-sky-600">
+						{{ house.rooms_count }}
+					</div>
+				</div>
+				<div class="mt-4 grid grid-cols-3 gap-2 text-sm">
+					<div>
+						<p class="text-xs text-slate-500">Occupied</p>
+						<p class="font-semibold text-emerald-600">{{ house.occupied_count }}</p>
+					</div>
+					<div>
+						<p class="text-xs text-slate-500">Vacant</p>
+						<p class="font-semibold text-amber-600">{{ house.vacant_count }}</p>
+					</div>
+					<div>
+						<p class="text-xs text-slate-500">Total</p>
+						<p class="font-semibold text-slate-900">{{ house.rooms_count }}</p>
+					</div>
+				</div>
+				<div class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-sky-600 group-hover:gap-2">
+					View rooms
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+					</svg>
+				</div>
+			</a>
+			{% endfor %}
+		</div>
+		{% else %}
+		<div class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+			<p class="text-sm text-slate-500">No properties yet</p>
+			<a href="{% url 'room:houses' %}" class="mt-3 inline-flex rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600">Add property</a>
+		</div>
+		{% endif %}
+	</div>
+
+	<!-- Recent Payments -->
+	<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+		<div class="mb-4">
+			<h2 class="text-lg font-semibold text-slate-900">Recent payments</h2>
+			<p class="text-sm text-slate-500">Latest billing activity</p>
+		</div>
+		{% if recent_payments %}
+		<div class="overflow-x-auto">
+			<table class="min-w-full text-sm text-slate-500">
+				<thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
+					<tr>
+						<th class="px-4 py-3 text-left">Property</th>
+						<th class="px-4 py-3 text-left">Room</th>
+						<th class="px-4 py-3 text-left">Month</th>
+						<th class="px-4 py-3 text-right">Total</th>
+						<th class="px-4 py-3 text-left">Status</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-slate-200">
+					{% for payment in recent_payments %}
+					<tr class="hover:bg-slate-50">
+						<td class="px-4 py-3 text-sm font-medium text-slate-900">{{ payment.room.house.name }}</td>
+						<td class="px-4 py-3 text-sm text-slate-700">{{ payment.room.room_number }}</td>
+						<td class="px-4 py-3 text-sm text-slate-700">{{ payment.billing_month }}</td>
+						<td class="px-4 py-3 text-right text-sm font-semibold text-slate-900">Rs. {{ payment.total }}</td>
+						<td class="px-4 py-3 text-sm">
+							{% if payment.status == 'completed' %}
+							<span class="rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">Completed</span>
+							{% elif payment.status == 'pending' %}
+							<span class="rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">Pending</span>
+							{% else %}
+							<span class="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{{ payment.status|title }}</span>
+							{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% else %}
+		<div class="rounded-lg border border-dashed border-gray-300 p-8 text-center">
+			<p class="text-sm text-gray-500">No payments recorded yet</p>
+		</div>
+		{% endif %}
+	</div>
+</section>
+{% endblock content %}

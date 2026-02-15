@@ -1,0 +1,27 @@
+[project]
+name = "ghar-hisab-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asgiref==3.9.1",
+    "black==25.9.0",
+    "click==8.3.0",
+    "django==4.2.25",
+    "django-allauth>=65.14.3",
+    "django-cors-headers==4.8.0",
+    "django-dashub>=4.0.0",
+    "djangorestframework==3.16.1",
+    "djangorestframework-simplejwt==5.5.1",
+    "mypy-extensions==1.1.0",
+    "packaging==25.0",
+    "pathspec==0.12.1",
+    "pillow>=12.1.1",
+    "platformdirs==4.5.0",
+    "psycopg2-binary==2.9.11",
+    "pyjwt==2.10.1",
+    "python-decouple==3.8",
+    "pytokens==0.2.0",
+    "sqlparse==0.5.3",
+]

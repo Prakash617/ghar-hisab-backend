@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import House, Room, Tenant, PaymentHistory, TenantDocument, PaymentReceived
+from .models import House, Room, Tenant, PaymentHistory, TenantDocument
 
 
 class HouseSerializer(serializers.ModelSerializer):
@@ -39,6 +39,8 @@ class TenantSerializer(serializers.ModelSerializer):
     room = serializers.PrimaryKeyRelatedField(
         queryset=Room.objects.all(), write_only=True
     )
+    roomName = serializers.CharField(source="room.room_name", read_only=True)
+    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
     moveInDate = serializers.DateField(source="move_in_date")
     electricityPricePerUnit = serializers.DecimalField(
         max_digits=10,
@@ -62,9 +64,12 @@ class TenantSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "roomId",
+            "roomName",
             "room",
             "name",
             "contact",
+            "email",
+            "email_verified",
             "moveInDate",
             "electricityPricePerUnit",
             "water_price",
@@ -73,6 +78,7 @@ class TenantSerializer(serializers.ModelSerializer):
             "initial_unit",
             "documents",
         ]
+        read_only_fields = ["email_verified"]
 
 
 class PaymentHistorySerializer(serializers.ModelSerializer):
@@ -80,32 +86,26 @@ class PaymentHistorySerializer(serializers.ModelSerializer):
     room = serializers.PrimaryKeyRelatedField(
         queryset=Room.objects.all(), write_only=True
     )
+    roomName = serializers.CharField(source="room.room_name", read_only=True)
 
     class Meta:
         model = PaymentHistory
         fields = [
             "id",
             "roomId",
+            "roomName",
             "room",
             "billing_month",
             "previous_units",
             "current_units",
             "electricity",
-            "electricity_paid",
-            "electricity_status",
-            "electricity_updated_at",
+            "payment_received_data",
             "water",
-            "water_paid",
-            "water_status",
-            "water_updated_at",
+            "remarks",
             "rent",
-            "rent_paid",
-            "rent_status",
-            "rent_updated_at",
+            
             "waste",
-            "waste_paid",
-            "waste_status",
-            "waste_updated_at",
+            
             "total",
             "total_paid",
             "status",
@@ -118,70 +118,11 @@ class PaymentHistorySerializer(serializers.ModelSerializer):
             "rent",
             "waste",
             "total",
-            "electricity_status",
-            "water_status",
-            "rent_status",
-            "waste_status",
             "status",
-            "total_paid",
             "created_at",
             "updated_at",
-            "electricity_updated_at",
-            "water_updated_at",
-            "rent_updated_at",
-            "waste_updated_at",
         ]
 
 
-class PaymentReceivedSerializer(serializers.ModelSerializer):
-    tenant_id = serializers.IntegerField(source="tenant.id", read_only=True)
-    tenant = serializers.PrimaryKeyRelatedField(
-        queryset=Tenant.objects.all(), write_only=True
-    )
-    received_date = serializers.CharField(max_length=50)
-    total_amount_due = serializers.SerializerMethodField()
-    remaining_amount = serializers.SerializerMethodField()
 
-    class Meta:
-        model = PaymentReceived
-        fields = [
-            "id",
-            "tenant_id",
-            "tenant",
-            "amount",
-            "received_date",
-            "remarks",
-            "status",
-            "created_at",
-            "total_amount_due",
-            "remaining_amount",
-        ]
-        read_only_fields = (
-            "status",
-            "created_at",
-            "total_amount_due",
-            "remaining_amount",
-        )
-
-    def get_total_amount_due(self, obj):
-        from django.db.models import Sum
-
-        total_due = (
-            PaymentHistory.objects.filter(room__tenant=obj.tenant).aggregate(
-                total_due=Sum("total")
-            )["total_due"]
-            or 0
-        )
-        return total_due
-
-    def get_remaining_amount(self, obj):
-        from django.db.models import Sum
-
-        total_due = self.get_total_amount_due(obj)
-        total_received = (
-            PaymentReceived.objects.filter(tenant=obj.tenant).aggregate(
-                total_received=Sum("amount")
-            )["total_received"]
-            or 0
-        )
-        return total_due - total_received
+# PaymentReceived model removed; related serializer omitted

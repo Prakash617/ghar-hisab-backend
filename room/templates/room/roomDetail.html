@@ -1,0 +1,742 @@
+{% extends "room/base.html" %}
+
+{% block content %}
+<section class="space-y-6 overflow-hidden">
+	<div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+		<div>
+			<h1 class="text-3xl font-bold text-slate-900">{{ room.room_name|default:room.room_number }}</h1>
+			<p class="mt-1 text-sm text-slate-600">{% if tenant %}Tenant profile and billing management{% else %}No tenant assigned to this room{% endif %}</p>
+		</div>
+		{% if tenant %}
+		<div class="flex gap-2">
+			<a href="#tenant-edit" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:border-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>Edit tenant</a>
+			<a href="{% url 'room:upload_document' room.id %}" class="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-600 shadow-sm hover:shadow-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>Upload</a>
+		</div>
+		{% endif %}
+	</div>
+
+	{% if tenant %}
+	<div class="space-y-6">
+			<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+				<div class="flex items-start justify-between">
+					<div>
+						<h2 class="text-xl font-bold text-slate-900">Tenant profile</h2>
+						<p class="mt-1 text-sm text-slate-600">Current tenant information</p>
+					</div>
+					<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800"><span class="h-2 w-2 rounded-full bg-emerald-600"></span>Active</span>
+				</div>
+				<div class="mt-6 grid gap-4 sm:grid-cols-2">
+					<div class="border-l-4 border-sky-500 pl-4">
+						<p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Name</p>
+						<p class="mt-1 text-base font-bold text-slate-900">{{ tenant.name }}</p>
+					</div>
+					<div class="border-l-4 border-blue-500 pl-4">
+						<p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Contact</p>
+						<p class="mt-1 text-base font-bold text-slate-900">{{ tenant.contact }}</p>
+					</div>
+					<div class="border-l-4 border-slate-400 pl-4">
+						<p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Email</p>
+						<p class="mt-1 text-base font-bold text-slate-900">{{ tenant.email|default:"-" }}</p>
+						{% if tenant.email %}
+							{% if tenant.email_verified %}
+								<span class="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">Verified</span>
+							{% else %}
+								<span class="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">Unverified</span>
+							{% endif %}
+						{% endif %}
+					</div>
+					<div class="border-l-4 border-purple-500 pl-4">
+						<p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Move-in date</p>
+						<p class="mt-1 text-base font-bold text-slate-900">{{ tenant.move_in_date|date:"M d, Y" }}</p>
+					</div>
+					<div class="border-l-4 border-emerald-500 pl-4">
+						<p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Monthly Rent</p>
+						<p class="mt-1 text-base font-bold text-emerald-600">Rs. {{ tenant.rent_price }}</p>
+					</div>
+					<div class="border-l-4 border-orange-500 pl-4">
+						<p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Electricity</p>
+						<p class="mt-1 text-base font-bold text-orange-600">Rs. {{ tenant.electricity_price_per_unit }}/unit</p>
+					</div>
+					<div class="border-l-4 border-cyan-500 pl-4">
+						<p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Water + Waste</p>
+						<p class="mt-1 text-base font-bold text-cyan-600">Rs. {{ tenant.water_price }} + {{ tenant.waste_price }}</p>
+					</div>
+				</div>
+			</div>
+
+			<div id="tenant-edit" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+			<div class="mb-6 flex items-center justify-between">
+				<div>
+					<h2 class="text-xl font-bold text-slate-900">Edit tenant info</h2>
+					<p class="mt-1 text-sm text-slate-600">Update tenant details</p>
+				</div>
+				<button type="submit" form="tenant-edit-form" class="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-600 shadow-sm hover:shadow-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Save changes</button>
+			</div>
+			<form id="tenant-edit-form" method="post" action="{% url 'room:update_tenant' room.id %}" class="space-y-4 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0">
+					{% csrf_token %}
+					<div>
+						<label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Name</label>
+						{{ tenant_form.name }}
+					</div>
+					<div>
+						<label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Contact</label>
+						{{ tenant_form.contact }}
+					</div>
+					<div>
+						<label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Email</label>
+						{{ tenant_form.email }}
+					</div>
+					<div>
+						<label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Move-in date</label>
+						{{ tenant_form.move_in_date }}
+					</div>
+					<div>
+						<label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Rent price</label>
+						{{ tenant_form.rent_price }}
+					</div>
+					<div>
+						<label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Electricity price/unit</label>
+						{{ tenant_form.electricity_price_per_unit }}
+					</div>
+					<div>
+						<label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Water price</label>
+						{{ tenant_form.water_price }}
+					</div>
+					<div>
+						<label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Waste price</label>
+						{{ tenant_form.waste_price }}
+					</div>
+					<div>
+						<label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Initial unit</label>
+						{{ tenant_form.initial_unit }}
+					</div>
+				</form>
+			</div>
+
+			<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+				<div class="flex items-center justify-between">
+					<div>
+						<h2 class="text-xl font-bold text-slate-900">Billing history</h2>
+					<p class="mt-1 text-sm text-slate-600">Monthly payment tracking</p>
+				</div>
+				<div class="flex flex-wrap items-center gap-2">
+					{% if unpaid_payments %}
+					<a
+						href="{% url 'room:send_pending_bills_email' room.id %}"
+						class="inline-flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-sky-100"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-18 8h18a2 2 0 002-2V6a2 2 0 00-2-2H3a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>Send email
+					</a>
+					{% endif %}
+					<a href="{% url 'room:add_payment' room.id %}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm hover:shadow-md"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>Add bill</a>
+				</div>
+			</div>
+			<div class="mt-6 w-full overflow-x-auto">
+				<table id="search-table" class="w-full text-left text-sm">
+						<thead class="bg-slate-50 border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-600">
+							<tr>
+								<th class="px-4 py-4 text-left">Bill created</th>
+								<th class="px-4 py-4 text-left">Billing month</th>
+								<th class="px-4 py-4 text-left">Units</th>
+								<th class="px-4 py-4 text-right">Electricity</th>
+								<th class="px-4 py-4 text-right">Rent</th>
+								<th class="px-4 py-4 text-right">Water</th>
+								<th class="px-4 py-4 text-right">Waste</th>
+								<th class="px-4 py-4 text-right font-bold">Total</th>
+								<th class="px-4 py-4 text-right">Amount Paid</th>
+								<th class="px-4 py-4 text-left">Payment received date</th>
+								<th class="px-4 py-4 text-left">Remarks</th>
+								<th class="px-4 py-4 text-center">Status</th>
+								<th class="px-4 py-4 text-center">Actions</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-slate-200">
+							{% for payment in page_obj %}
+							<tr class="bg-white transition hover:bg-slate-50 hover:shadow-sm">
+								<td class="px-4 py-4 font-medium text-slate-900">{{ payment.created_at|date:"d M Y" }}</td>
+								<td class="px-4 py-4 text-slate-700 font-semibold">{{ payment.billing_month }}</td>
+								<td class="px-4 py-4 text-slate-700">{{ payment.previous_units }} → {{ payment.current_units }}</td>
+								<td class="px-4 py-4 text-right text-slate-900 font-semibold">Rs. {{ payment.electricity }}</td>
+								<td class="px-4 py-4 text-right text-slate-900 font-semibold">Rs. {{ payment.rent }}</td>
+								<td class="px-4 py-4 text-right text-slate-900">Rs. {{ payment.water }}</td>
+								<td class="px-4 py-4 text-right text-slate-900">Rs. {{ payment.waste }}</td>
+								<td class="px-4 py-4 text-right text-slate-900 font-bold text-lg">Rs. {{ payment.total }}</td>
+								<td class="px-4 py-4 text-right text-emerald-600 font-semibold">Rs. {{ payment.total_paid }}</td>
+								<td class="px-4 py-4 text-slate-700 text-xs">{{ payment.payment_received_date|truncatewords:1 }}</td>
+								<td class="px-4 py-4 text-slate-600 text-xs">{{ payment.remarks|default:"-"|truncatewords:3 }}</td>
+								<td class="px-4 py-4 text-center">
+									{% if payment.status == 'Paid' %}
+									<span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800"><span class="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>Paid</span>
+									{% elif payment.status == 'Partially Paid' %}
+									<span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800"><span class="h-1.5 w-1.5 rounded-full bg-amber-600"></span>Partial</span>
+									{% else %}
+									<span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800"><span class="h-1.5 w-1.5 rounded-full bg-red-600"></span>Unpaid</span>
+									{% endif %}
+								</td>
+								<td class="px-4 py-4 text-center">
+									<div class="flex justify-center gap-2">
+										<button
+											type="button"
+											class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+											data-modal-action="view"
+											data-billing-month="{{ payment.billing_month }}"
+											data-previous-units="{{ payment.previous_units }}"
+											data-current-units="{{ payment.current_units }}"
+											data-electricity="{{ payment.electricity }}"
+											data-rent="{{ payment.rent }}"
+											data-water="{{ payment.water }}"
+											data-waste="{{ payment.waste }}"
+											data-total="{{ payment.total }}"
+											data-total-paid="{{ payment.total_paid }}"
+											data-payment-received-date="{{ payment.payment_received_date|default:"-" }}"
+											data-remarks="{{ payment.remarks|default:"" }}"
+											data-status="{{ payment.status }}"
+											data-edit-url="{% url 'room:edit_payment' payment.id %}"
+											data-send-url="{% url 'room:send_bill_email' payment.id %}"
+										><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+										</button>
+										<button type="button" class="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100" data-modal-action="edit" data-modal-url="{% url 'room:edit_payment' payment.id %}"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
+										<button type="button" class="inline-flex items-center gap-1 rounded-md bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100" data-modal-action="delete" data-modal-url="{% url 'room:delete_payment' payment.id %}"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+									</div>
+								</td>
+							</tr>
+							{% empty %}
+							<tr>
+								<td colspan="13" class="px-4 py-6 text-center text-sm text-gray-500">No billing records yet</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				{% if page_obj.has_other_pages %}
+				<nav class="mt-4 flex flex-wrap items-center justify-between gap-3" aria-label="Table navigation">
+					<span class="text-sm text-gray-500">
+						Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+					</span>
+					<ul class="inline-flex items-center -space-x-px text-sm">
+						<li>
+							{% if page_obj.has_previous %}
+							<a href="?page={{ page_obj.previous_page_number }}" class="rounded-l-lg border border-gray-300 bg-white px-3 py-2 text-gray-500 hover:bg-gray-100">Previous</a>
+							{% else %}
+							<span class="rounded-l-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-400 cursor-not-allowed">Previous</span>
+							{% endif %}
+						</li>
+						{% for num in page_obj.paginator.page_range %}
+						<li>
+							{% if page_obj.number == num %}
+							<span class="border border-gray-300 bg-gray-900 px-3 py-2 text-white">{{ num }}</span>
+							{% else %}
+							<a href="?page={{ num }}" class="border border-gray-300 bg-white px-3 py-2 text-gray-500 hover:bg-gray-100">{{ num }}</a>
+							{% endif %}
+						</li>
+						{% endfor %}
+						<li>
+							{% if page_obj.has_next %}
+							<a href="?page={{ page_obj.next_page_number }}" class="rounded-r-lg border border-gray-300 bg-white px-3 py-2 text-gray-500 hover:bg-gray-100">Next</a>
+							{% else %}
+							<span class="rounded-r-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-400 cursor-not-allowed">Next</span>
+							{% endif %}
+						</li>
+					</ul>
+				</nav>
+				{% endif %}
+			</div>
+	</div>
+	{% else %}
+	<div class="rounded-xl border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 p-12 text-center">
+		<div class="mx-auto max-w-md">
+			<div class="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
+				<svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+			</div>
+			<h2 class="text-2xl font-bold text-gray-900">No Tenant Assigned</h2>
+			<p class="mt-2 text-gray-600">This room is currently vacant. Assign a tenant to start tracking billing and documents.</p>
+			<a href="{% url 'room:add_tenant' room.id %}" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 shadow-lg hover:shadow-xl"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>Assign Tenant</a>
+		</div>
+	</div>
+	{% endif %}
+
+	<div class="grid gap-6 lg:grid-cols-2">
+		<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+			<div class="flex items-center gap-3 mb-6">
+				<div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+					<svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+				</div>
+				<h2 class="text-xl font-bold text-gray-900">Room summary</h2>
+			</div>
+			<div class="space-y-4">
+				<div class="border-l-4 border-purple-500 pl-4">
+					<p class="text-xs font-semibold uppercase tracking-widest text-gray-500">House</p>
+					<p class="mt-1 text-lg font-bold text-gray-900">{{ room.house.name }}</p>
+				</div>
+				<div class="border-l-4 border-blue-500 pl-4">
+					<p class="text-xs font-semibold uppercase tracking-widest text-gray-500">Room number</p>
+					<p class="mt-1 text-lg font-bold text-gray-900">{{ room.room_number }}</p>
+				</div>
+				<div class="border-l-4 {% if room.is_occupied %}border-emerald-500{% else %}border-gray-400{% endif %} pl-4">
+					<p class="text-xs font-semibold uppercase tracking-widest text-gray-500">Status</p>
+					<div class="mt-2">
+						{% if room.is_occupied %}
+						<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-bold text-emerald-800"><span class="h-2.5 w-2.5 rounded-full bg-emerald-600"></span>Occupied</span>
+						{% else %}
+						<span class="inline-flex items-center gap-1.5 rounded-full bg-gray-200 px-3 py-1.5 text-sm font-bold text-gray-800"><span class="h-2.5 w-2.5 rounded-full bg-gray-600"></span>Vacant</span>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+			<div class="flex items-center justify-between mb-6">
+				<div class="flex items-center gap-3">
+					<div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
+						<svg class="h-5 w-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+					</div>
+					<h2 class="text-xl font-bold text-gray-900">Tenant documents</h2>
+				</div>
+				<a href="{% url 'room:upload_document' room.id %}" class="inline-flex items-center gap-2 rounded-lg bg-orange-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-orange-700 shadow-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>Add</a>
+			</div>
+			{% if documents %}
+			<ul class="space-y-3">
+				{% for doc in documents %}
+				<li class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 transition hover:bg-slate-100">
+					<div>
+						<p class="font-semibold text-slate-900">{{ doc.name|default:"Document" }}</p>
+						<p class="text-xs text-slate-500 mt-1">Uploaded: {{ doc.uploaded_at|date:"M d, Y"|default:"-" }}</p>
+					</div>
+					<a class="inline-flex items-center gap-1.5 rounded-md bg-sky-100 px-3 py-1.5 text-xs font-semibold text-sky-700 transition hover:bg-sky-200" href="{{ doc.document.url }}" target="_blank"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>View</a>
+				</li>
+				{% endfor %}
+			</ul>
+			{% else %}
+			<div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+				<svg class="mx-auto h-10 w-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+				<p class="mt-3 text-sm font-semibold text-slate-900">No documents uploaded</p>
+				<p class="text-xs text-slate-500">Upload documents to track tenant information</p>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+
+	<div id="payment-action-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm">
+		<div class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+			<div class="flex items-start justify-between">
+				<div>
+					<h3 id="payment-action-title" class="text-xl font-bold text-slate-900">Confirm action</h3>
+					<p id="payment-action-body" class="mt-1 text-sm text-slate-600">Proceed with this action?</p>
+				</div>
+				<button type="button" class="rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" data-modal-close aria-label="Close">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+				</button>
+			</div>
+		<div id="payment-action-details" class="mt-6 hidden max-h-96 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50 p-5">
+				<div class="grid gap-3 text-sm sm:grid-cols-2">
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Billing month</p>
+						<p id="payment-detail-billing" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Units</p>
+						<p id="payment-detail-units" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Electricity</p>
+						<p id="payment-detail-electricity" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Rent</p>
+						<p id="payment-detail-rent" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Water</p>
+						<p id="payment-detail-water" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Waste</p>
+						<p id="payment-detail-waste" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Total</p>
+						<p id="payment-detail-total" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Total paid</p>
+						<p id="payment-detail-total-paid" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Payment received date</p>
+						<p id="payment-detail-received" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div>
+						<p class="text-xs uppercase tracking-wide text-slate-400">Status</p>
+						<p id="payment-detail-status" class="font-semibold text-slate-900">-</p>
+					</div>
+					<div class="sm:col-span-2">
+						<p class="text-xs uppercase tracking-wide text-slate-400">Remarks</p>
+						<p id="payment-detail-remarks" class="font-semibold text-slate-900">-</p>
+					</div>
+				</div>
+			</div>
+			<div class="mt-6 flex flex-wrap items-center justify-end gap-2">
+				<button type="button" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" data-modal-close>Cancel</button>
+				<a id="payment-action-edit" href="#" class="hidden rounded-md border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-100">Edit</a>
+				<button id="payment-action-send" type="button" class="hidden rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" data-compose-open>Send bill</button>
+				<a id="payment-action-confirm" href="#" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Continue</a>
+				<form id="payment-action-form" method="post" class="hidden">
+					{% csrf_token %}
+					<button type="submit" id="payment-action-submit" class="rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">Delete</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div id="compose-bill-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm">
+		<div class="w-full max-w-2xl rounded-xl bg-white p-6 shadow-2xl">
+			<div class="flex items-start justify-between">
+				<div>
+					<h3 class="text-xl font-bold text-slate-900">Send bill email</h3>
+					<p class="mt-1 text-sm text-slate-600">Review and edit the message before sending.</p>
+				</div>
+				<button type="button" class="rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" data-compose-close aria-label="Close">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+				</button>
+			</div>
+			<form id="compose-bill-form" method="post" class="mt-5 space-y-4">
+				{% csrf_token %}
+				<textarea id="compose-bill-message" name="custom_message" rows="6" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700" placeholder="Add a note for the tenant..."></textarea>
+				<div class="flex flex-wrap items-center justify-end gap-2">
+					<button type="button" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" data-compose-close>Cancel</button>
+					<button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Send bill</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div id="unpaid-bills-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm">
+		<div class="w-full max-w-3xl rounded-xl bg-white p-6 shadow-2xl">
+			<div class="flex items-start justify-between">
+				<div>
+					<h3 class="text-xl font-bold text-gray-900">Pending bills</h3>
+					<p class="mt-1 text-sm text-gray-600">Unpaid and partially paid bills.</p>
+				</div>
+				<button type="button" class="rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-600" data-unpaid-close aria-label="Close">
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+				</button>
+			</div>
+			<div class="mt-5 overflow-x-auto">
+				<table class="w-full text-left text-sm">
+					<thead class="bg-gray-50 text-xs font-bold uppercase text-gray-600">
+						<tr>
+							<th class="px-4 py-3">Created</th>
+							<th class="px-4 py-3">Billing month</th>
+							<th class="px-4 py-3">Total</th>
+							<th class="px-4 py-3">Paid</th>
+							<th class="px-4 py-3">Status</th>
+							<th class="px-4 py-3 text-right">Actions</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-gray-200">
+						{% for payment in unpaid_payments %}
+						<tr class="bg-white hover:bg-gray-50">
+							<td class="px-4 py-3 font-medium text-gray-900">{{ payment.created_at|date:"d M Y" }}</td>
+							<td class="px-4 py-3">{{ payment.billing_month }}</td>
+							<td class="px-4 py-3 font-semibold text-gray-900">Rs. {{ payment.total }}</td>
+							<td class="px-4 py-3 text-emerald-600 font-semibold">Rs. {{ payment.total_paid }}</td>
+							<td class="px-4 py-3">
+								{% if payment.status == 'Partially Paid' %}
+								<span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">Partial</span>
+								{% else %}
+								<span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">Unpaid</span>
+								{% endif %}
+							</td>
+							<td class="px-4 py-3 text-right">
+								<div class="inline-flex items-center gap-2">
+									<button
+										type="button"
+										class="inline-flex items-center gap-1 rounded-md bg-sky-50 px-2.5 py-1.5 text-xs font-semibold text-sky-700 transition hover:bg-sky-100"
+										data-modal-action="view"
+										data-billing-month="{{ payment.billing_month }}"
+										data-previous-units="{{ payment.previous_units }}"
+										data-current-units="{{ payment.current_units }}"
+										data-electricity="{{ payment.electricity }}"
+										data-rent="{{ payment.rent }}"
+										data-water="{{ payment.water }}"
+										data-waste="{{ payment.waste }}"
+										data-total="{{ payment.total }}"
+										data-total-paid="{{ payment.total_paid }}"
+										data-payment-received-date="{{ payment.payment_received_date|default:"-" }}"
+										data-remarks="{{ payment.remarks|default:"" }}"
+										data-status="{{ payment.status }}"
+										data-edit-url="{% url 'room:edit_payment' payment.id %}"
+										data-send-url="{% url 'room:send_bill_email' payment.id %}"
+									>
+										<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+									</button>
+									<a class="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100" href="{% url 'room:edit_payment' payment.id %}">Edit</a>
+									<button
+										type="button"
+										class="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+										data-compose-open
+										data-send-url="{% url 'room:send_bill_email' payment.id %}"
+										data-billing-month="{{ payment.billing_month }}"
+										data-previous-units="{{ payment.previous_units }}"
+										data-current-units="{{ payment.current_units }}"
+										data-electricity="{{ payment.electricity }}"
+										data-rent="{{ payment.rent }}"
+										data-water="{{ payment.water }}"
+										data-waste="{{ payment.waste }}"
+										data-total="{{ payment.total }}"
+										data-total-paid="{{ payment.total_paid }}"
+									>Send</button>
+								</div>
+							</td>
+						</tr>
+						{% empty %}
+						<tr>
+							<td colspan="6" class="px-4 py-6 text-center text-sm text-gray-500">No pending bills.</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
+<script>
+	(function () {
+		var modal = document.getElementById('payment-action-modal');
+		if (!modal) {
+			return;
+		}
+
+		var title = document.getElementById('payment-action-title');
+		var body = document.getElementById('payment-action-body');
+		var confirm = document.getElementById('payment-action-confirm');
+		var editLink = document.getElementById('payment-action-edit');
+		var sendLink = document.getElementById('payment-action-send');
+		var form = document.getElementById('payment-action-form');
+		var closeButtons = modal.querySelectorAll('[data-modal-close]');
+		var details = document.getElementById('payment-action-details');
+		var detailFields = {
+			billing: document.getElementById('payment-detail-billing'),
+			units: document.getElementById('payment-detail-units'),
+			electricity: document.getElementById('payment-detail-electricity'),
+			rent: document.getElementById('payment-detail-rent'),
+			water: document.getElementById('payment-detail-water'),
+			waste: document.getElementById('payment-detail-waste'),
+			total: document.getElementById('payment-detail-total'),
+			totalPaid: document.getElementById('payment-detail-total-paid'),
+			received: document.getElementById('payment-detail-received'),
+			status: document.getElementById('payment-detail-status'),
+			remarks: document.getElementById('payment-detail-remarks')
+		};
+		var unpaidModal = document.getElementById('unpaid-bills-modal');
+		var unpaidOpen = document.querySelector('[data-unpaid-modal-open]');
+		var unpaidClose = unpaidModal ? unpaidModal.querySelector('[data-unpaid-close]') : null;
+		var composeModal = document.getElementById('compose-bill-modal');
+		var composeForm = document.getElementById('compose-bill-form');
+		var composeMessage = document.getElementById('compose-bill-message');
+		var composeClose = composeModal ? composeModal.querySelectorAll('[data-compose-close]') : [];
+		var currentBillData = null;
+
+		var buildBillMessage = function (data) {
+			if (!data) {
+				return '';
+			}
+			return (
+				'Hi,\n\n' +
+				'Here is your billing summary:\n' +
+				'Billing month: ' + (data.billingMonth || '-') + '\n' +
+				'Units: ' + (data.previousUnits || '-') + ' -> ' + (data.currentUnits || '-') + '\n' +
+				'Electricity: Rs. ' + (data.electricity || '0') + '\n' +
+				'Rent: Rs. ' + (data.rent || '0') + '\n' +
+				'Water: Rs. ' + (data.water || '0') + '\n' +
+				'Waste: Rs. ' + (data.waste || '0') + '\n' +
+				'Total: Rs. ' + (data.total || '0') + '\n\n' +
+				'Thank you.'
+			);
+		};
+
+		var openModal = function (action, button) {
+			if (action === 'delete') {
+				title.textContent = 'Delete payment?';
+				body.textContent = 'This action cannot be undone.';
+				confirm.classList.add('hidden');
+				editLink.classList.add('hidden');
+				sendLink.classList.add('hidden');
+				form.classList.remove('hidden');
+				form.setAttribute('action', button.dataset.modalUrl);
+				if (details) {
+					details.classList.add('hidden');
+				}
+			} else if (action === 'view') {
+				title.textContent = 'Payment details';
+				body.textContent = 'Review the billing information below.';
+				confirm.classList.add('hidden');
+				form.classList.add('hidden');
+				editLink.classList.remove('hidden');
+				sendLink.classList.remove('hidden');
+				if (button.dataset.editUrl) {
+					editLink.setAttribute('href', button.dataset.editUrl);
+				} else {
+					editLink.removeAttribute('href');
+				}
+				if (button.dataset.sendUrl) {
+					sendLink.setAttribute('data-send-url', button.dataset.sendUrl);
+				} else {
+					sendLink.removeAttribute('data-send-url');
+				}
+				currentBillData = {
+					billingMonth: button.dataset.billingMonth,
+					previousUnits: button.dataset.previousUnits,
+					currentUnits: button.dataset.currentUnits,
+					electricity: button.dataset.electricity,
+					rent: button.dataset.rent,
+					water: button.dataset.water,
+					waste: button.dataset.waste,
+					total: button.dataset.total
+				};
+				form.classList.add('hidden');
+				if (details) {
+					detailFields.billing.textContent = button.dataset.billingMonth || '-';
+					detailFields.units.textContent =
+						(button.dataset.previousUnits || '-') +
+						' -> ' +
+						(button.dataset.currentUnits || '-');
+					detailFields.electricity.textContent = 'Rs. ' + (button.dataset.electricity || '0');
+					detailFields.rent.textContent = 'Rs. ' + (button.dataset.rent || '0');
+					detailFields.water.textContent = 'Rs. ' + (button.dataset.water || '0');
+					detailFields.waste.textContent = 'Rs. ' + (button.dataset.waste || '0');
+					detailFields.total.textContent = 'Rs. ' + (button.dataset.total || '0');
+					detailFields.totalPaid.textContent = 'Rs. ' + (button.dataset.totalPaid || '0');
+					detailFields.received.textContent = button.dataset.paymentReceivedDate || '-';
+					detailFields.status.textContent = button.dataset.status || '-';
+					detailFields.remarks.textContent = button.dataset.remarks || '-';
+					details.classList.remove('hidden');
+				}
+			} else {
+				title.textContent = 'Edit payment?';
+				body.textContent = 'You will be redirected to the edit form.';
+				confirm.textContent = 'Edit';
+				confirm.className = 'rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white';
+				confirm.classList.remove('hidden');
+				editLink.classList.add('hidden');
+				sendLink.classList.add('hidden');
+				form.classList.add('hidden');
+				if (details) {
+					details.classList.add('hidden');
+				}
+			}
+
+			if (button.dataset.modalUrl) {
+				confirm.setAttribute('href', button.dataset.modalUrl);
+			} else {
+				confirm.removeAttribute('href');
+			}
+			modal.classList.remove('hidden');
+			modal.classList.add('flex');
+		};
+
+		var closeModal = function () {
+			modal.classList.add('hidden');
+			modal.classList.remove('flex');
+		};
+
+		document.addEventListener('click', function (event) {
+			var button = event.target.closest('[data-modal-action]');
+			if (!button) {
+				return;
+			}
+			event.preventDefault();
+			openModal(button.dataset.modalAction, button);
+		});
+
+		document.addEventListener('click', function (event) {
+			var sendButton = event.target.closest('[data-compose-open]');
+			if (!sendButton || !composeModal || !composeForm) {
+				return;
+			}
+			event.preventDefault();
+			var sendUrl = sendButton.getAttribute('data-send-url');
+			if (sendUrl) {
+				composeForm.setAttribute('action', sendUrl);
+			}
+			var sendData = {
+				billingMonth: sendButton.dataset.billingMonth,
+				previousUnits: sendButton.dataset.previousUnits,
+				currentUnits: sendButton.dataset.currentUnits,
+				electricity: sendButton.dataset.electricity,
+				rent: sendButton.dataset.rent,
+				water: sendButton.dataset.water,
+				waste: sendButton.dataset.waste,
+				total: sendButton.dataset.total
+			};
+			var dataToUse = sendButton.dataset.billingMonth ? sendData : currentBillData;
+			if (composeMessage) {
+				composeMessage.value = buildBillMessage(dataToUse);
+			}
+			composeModal.classList.remove('hidden');
+			composeModal.classList.add('flex');
+		});
+
+		if (composeClose && composeModal) {
+			composeClose.forEach(function (button) {
+				button.addEventListener('click', function () {
+					composeModal.classList.add('hidden');
+					composeModal.classList.remove('flex');
+				});
+			});
+		}
+
+		if (composeModal) {
+			composeModal.addEventListener('click', function (event) {
+				if (event.target === composeModal) {
+					composeModal.classList.add('hidden');
+					composeModal.classList.remove('flex');
+				}
+			});
+		}
+
+		if (unpaidOpen && unpaidModal) {
+			unpaidOpen.addEventListener('click', function () {
+				unpaidModal.classList.remove('hidden');
+				unpaidModal.classList.add('flex');
+			});
+		}
+
+		if (unpaidClose && unpaidModal) {
+			unpaidClose.addEventListener('click', function () {
+				unpaidModal.classList.add('hidden');
+				unpaidModal.classList.remove('flex');
+			});
+		}
+
+		if (unpaidModal) {
+			unpaidModal.addEventListener('click', function (event) {
+				if (event.target === unpaidModal) {
+					unpaidModal.classList.add('hidden');
+					unpaidModal.classList.remove('flex');
+				}
+			});
+		}
+
+		closeButtons.forEach(function (button) {
+			button.addEventListener('click', closeModal);
+		});
+
+		modal.addEventListener('click', function (event) {
+			if (event.target === modal) {
+				closeModal();
+			}
+		});
+	})();
+
+	if (document.getElementById('search-table') && typeof simpleDatatables.DataTable !== 'undefined') {
+		new simpleDatatables.DataTable('#search-table', {
+			searchable: true,
+			sortable: false
+		});
+	}
+</script>
+{% endblock content %}

@@ -1,0 +1,49 @@
+{% extends "room/base.html" %}
+
+{% block content %}
+<section class="space-y-6">
+	<div class="flex flex-wrap items-center justify-between gap-3">
+		<div>
+			<h1 class="text-2xl font-semibold text-slate-900">Rooms - {{ house.name }}</h1>
+			<p class="text-sm text-slate-500">Rooms in this house.</p>
+		</div>
+		<a href="{% url 'room:add_room' house.id %}" class="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-sky-200 hover:bg-sky-600">Add room</a>
+	</div>
+
+	<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+		{% for room in rooms %}
+			<a href="{% url 'room:room_detail' room.id %}" class="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+				<div class="flex items-start justify-between">
+					<div>
+						<h2 class="text-lg font-semibold text-slate-900">
+							{% if room.room_name %}{{ room.room_name }}{% else %}Room {{ room.room_number }}{% endif %}
+						</h2>
+						<p class="text-sm text-slate-500">Room number: {{ room.room_number }}</p>
+					</div>
+					<div class="text-right">
+						<p class="text-xs font-semibold text-slate-500">
+							{% if room.is_occupied %}Active{% else %}Inactive{% endif %}
+						</p>
+						<label onclick="event.preventDefault(); event.stopPropagation();" class="mt-1 inline-flex cursor-pointer items-center">
+							<input onclick="event.preventDefault(); event.stopPropagation();" type="checkbox" class="peer sr-only" {% if room.is_occupied %}checked{% endif %} />
+							<span class="h-5 w-9 rounded-full bg-slate-200 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition peer-checked:bg-emerald-500 peer-checked:after:translate-x-4 relative"></span>
+						</label>
+					</div>
+				</div>
+				<div class="mt-4 flex items-center justify-between text-sm text-slate-600">
+					<span>Status: {% if room.is_occupied %}Occupied{% else %}Available{% endif %}</span>
+					<span>Electricity: Rs. 15/unit</span>
+				</div>
+				<div class="mt-4 flex gap-2">
+					<button onclick="event.preventDefault(); event.stopPropagation();" class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700">Edit</button>
+					<button onclick="event.preventDefault(); event.stopPropagation();" class="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">Delete</button>
+				</div>
+			</a>
+		{% empty %}
+			<div class="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+				No rooms found for this house.
+			</div>
+		{% endfor %}
+	</div>
+</section>
+{% endblock content %}

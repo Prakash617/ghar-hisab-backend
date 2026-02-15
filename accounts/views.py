@@ -1,6 +1,10 @@
 from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
+from django.utils.decorators import method_decorator
+User = get_user_model()
 from .serializers import (
     UserSerializer,
     RegisterSerializer,
@@ -14,6 +18,16 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 import jwt
 from rest_framework_simplejwt.exceptions import TokenError
+
+
+@method_decorator(login_required, name='dispatch')
+class ProfileView(TemplateView):
+    template_name = 'account/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        return context
 
 
 class MeView(generics.RetrieveUpdateAPIView):

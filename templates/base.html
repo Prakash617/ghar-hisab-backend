@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ghar Hisab{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Additional styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <!-- Navigation -->
+    <header class="relative">
+        <div class="absolute inset-0 -z-10">
+            <div class="absolute -top-20 -right-16 h-56 w-56 rounded-full bg-sky-200/70 blur-3xl"></div>
+            <div class="absolute top-16 -left-16 h-56 w-56 rounded-full bg-emerald-200/70 blur-3xl"></div>
+        </div>
+        <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+            <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white ring-1 ring-slate-200 shadow-sm">
+                    <svg class="h-5 w-5 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 10.5 12 4l9 6.5M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold tracking-[0.3em] text-slate-500">GHAR</p>
+                    <p class="text-lg font-semibold">Hisaab</p>
+                </div>
+            </div>
+            <div class="hidden items-center gap-4 sm:flex">
+                <a href="/#features" class="text-sm text-slate-500 hover:text-slate-900">Features</a>
+                <a href="/#workflow" class="text-sm text-slate-500 hover:text-slate-900">Workflow</a>
+                <a href="/#pricing" class="text-sm text-slate-500 hover:text-slate-900">Plans</a>
+            </div>
+            <div class="flex items-center gap-3">
+                {% if user.is_authenticated %}
+                    <span class="hidden text-sm text-slate-500 sm:block">{{ user.email }}</span>
+                    <a href="{% url 'account_logout' %}" class="text-sm font-semibold text-slate-600 hover:text-slate-900">
+                        Sign Out
+                    </a>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="text-sm font-semibold text-slate-600 hover:text-slate-900">
+                        Log in
+                    </a>
+                    <a href="{% url 'account_signup' %}" class="inline-flex items-center rounded-full bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-sky-200 hover:bg-sky-600">
+                        Get started
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            {% for message in messages %}
+                <div class="p-4 mb-4 rounded-lg {% if message.tags %}{{ message.tags }}{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="mx-auto max-w-6xl px-6 py-12">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white mt-12">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-6 text-xs text-slate-500">
+            <p>2026 Ghar Hisaab. Built for calm property management.</p>
+            <div class="flex gap-4">
+                <a href="/#features" class="hover:text-slate-900">Features</a>
+                <a href="/#workflow" class="hover:text-slate-900">Workflow</a>
+                <a href="/#pricing" class="hover:text-slate-900">Plans</a>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
