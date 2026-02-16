@@ -2,7 +2,7 @@ import os
 
 from pathlib import Path
 
-from decouple import config
+from decouple import config, Csv
 
 
 
@@ -34,7 +34,9 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 
 
-ALLOWED_HOSTS = ["nurseicon.com.np", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
+
+SITE_URL = config("SITE_URL", default="http://127.0.0.1:8000")
 
 
 
@@ -70,9 +72,8 @@ SITE_ID = 1
 AUTH_USER_MODEL = "accounts.User"
 
 
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # none | optional | mandatory
@@ -124,24 +125,26 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if DEBUG:
+DB_ENGINE = config("DB_ENGINE", default="django.db.backends.sqlite3")
+
+if DB_ENGINE == "django.db.backends.sqlite3":
     # Local development database
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 else:
     # Production database (from .env)
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('DB_NAME'),
-            'USER': config('DB_USER'),
-            'PASSWORD': config('DB_PASSWORD'),
-            'HOST': config('DB_HOST'),
-            'PORT': config('DB_PORT'),
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": config("DB_NAME"),
+            "USER": config("DB_USER"),
+            "PASSWORD": config("DB_PASSWORD"),
+            "HOST": config("DB_HOST"),
+            "PORT": config("DB_PORT"),
         }
     }
 
@@ -212,7 +215,7 @@ SIMPLE_JWT = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = config("STATIC_URL", default="/static/")
 
 # STATIC_ROOT = BASE_DIR / 'staticfiles'
 # STATICFILES_DIRS = []
@@ -220,7 +223,7 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"] if DEBUG else []
 STATIC_ROOT = BASE_DIR / "staticfiles"  # Optional: define a static root for production
 
-MEDIA_URL = "/media/"
+MEDIA_URL = config("MEDIA_URL", default="/media/")
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
@@ -239,7 +242,9 @@ REST_FRAMEWORK = {
     ),
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=Csv())
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
+CORS_ALLOW_ALL_ORIGINS = not CORS_ALLOWED_ORIGINS
 
 import sys
 from django.core.exceptions import AppRegistryNotReady

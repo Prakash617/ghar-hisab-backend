@@ -11,7 +11,6 @@ urlpatterns = [
     path("", include("room.urls")),
     path("api/accounts/", include("accounts.urls")),
     path("api-auth/", include("rest_framework.urls")),
-    path("room/", include("room.urls")),
     path("accounts/", include("allauth.urls")),
 ]
 
