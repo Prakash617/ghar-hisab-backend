@@ -1,21 +1,35 @@
-DB_NAME=gharhisab
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_HOST=localhost
+# ===============================
+# DATABASE
+# ===============================
+DB_NAME=ghar_hisab_db
+DB_USER=ghar_hisab_user
+DB_PASSWORD=changeme123
+DB_HOST=db
 DB_PORT=5432
+DB_ENGINE=django.db.backends.postgresql
+# DB_ENGINE=django.db.backends.sqlite3
 
-STATIC_URL = /static/
-MEDIA_URL = /media/
-DB_ENGINE = django.db.backends.postgresql
-# DB_ENGINE = django.db.backends.sqlite3
+# ===============================
+# DJANGO CORE
+# ===============================
+SECRET_KEY="django-insecure-smj3k7)x+j#onq0_$huba-5_9xp=v+kords^n5diz02yw1wpr8"
+DEBUG=True
 SITE_URL=http://127.0.0.1:8000
 
+# ===============================
+# STATIC & MEDIA
+# ===============================
+STATIC_URL=/static/
+MEDIA_URL=/media/
 
-DEBUG=True
-
+# ===============================
+# CORS
+# ===============================
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://api.gowell.edu.np,https://mobilepoint-seven.vercel.app,https://meguro.com.np,http://64.227.187.73,https://64.227.187.73,https://www.meguro.com.np
 
 CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://api.gowell.edu.np,https://mobilepoint-seven.vercel.app,https://meguro.com.np,http://64.227.187.73,https://64.227.187.73,https://www.meguro.com.np
 
-SECRET_KEY=django-insecure-smj3k7)x+j#onq0_$huba-5_9xp=v+kords^n5diz02yw1wpr8
-ALLOWED_HOSTS = mobilepoint.sayathari.com,www.mobilepoint.sayathari.com,127.0.0.1,https://meguro.com.np,http://64.227.187.73,https://64.227.187.73,https://www.meguro.com.np
+# ===============================
+# ALLOWED HOSTS (NO http/https here)
+# ===============================
+ALLOWED_HOSTS=mobilepoint.sayathari.com,www.mobilepoint.sayathari.com,127.0.0.1,64.227.187.73,meguro.com.np,www.meguro.com.np,localhost
