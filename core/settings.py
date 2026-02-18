@@ -79,7 +79,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # none | optional | mandatory
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 
-LOGIN_REDIRECT_URL = "/room/dashboard/"
+LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/"
 
 
