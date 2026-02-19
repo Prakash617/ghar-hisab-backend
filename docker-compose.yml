@@ -41,8 +41,10 @@ services:
         condition: service_healthy
     networks:
       - ghar_hisab_network
+    ports:
+      - "8001:8000"
     expose:
-      - "8000"
+      - "8001"
 
   nginx:
     image: nginx:alpine
