@@ -30,13 +30,13 @@ SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG')
 
 
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=Csv())
 
-SITE_URL = config("SITE_URL", default="http://127.0.0.1:8000")
+SITE_URL = config("SITE_URL")
 
 
 
@@ -125,7 +125,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DB_ENGINE = config("DB_ENGINE", default="django.db.backends.sqlite3")
+DB_ENGINE = config("DB_ENGINE")
 
 if DB_ENGINE == "django.db.backends.sqlite3":
     # Local development database
